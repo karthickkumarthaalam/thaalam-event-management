@@ -3,6 +3,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
+import { EventModule } from './events/event.module';
+import { TicketModule } from './ticket/tickets.module';
+import { TaxesModule } from './taxes/taxes.module';
 
 @Module({
   imports: [
@@ -21,6 +25,10 @@ import { AppService } from './app.service';
         synchronize: true,
       }),
     }),
+    AuthModule,
+    EventModule,
+    TicketModule,
+    TaxesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
