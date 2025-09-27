@@ -5,11 +5,12 @@ import { Ticket } from 'src/entities/ticket.entity';
 import { TicketService } from './tickets.service';
 import { TicketController } from './tickets.controller';
 import { Tax } from 'src/entities/tax.entity';
+import { RedisService } from 'src/redis/redis.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Ticket, Addon, Tax])],
   controllers: [TicketController],
-  providers: [TicketService],
+  providers: [TicketService, RedisService],
   exports: [TicketService],
 })
 export class TicketModule {}

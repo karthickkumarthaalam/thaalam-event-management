@@ -1,11 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository, In, EntityManager } from 'typeorm';
 import { Addon } from 'src/entities/addon.entity';
 import { Ticket } from 'src/entities/ticket.entity';
 import { Tax } from 'src/entities/tax.entity';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
+import { RedisService } from 'src/redis/redis.service';
 
 @Injectable()
 export class TicketService {
@@ -16,6 +21,7 @@ export class TicketService {
     private readonly addonRepo: Repository<Addon>,
     @InjectRepository(Tax)
     private readonly taxRepo: Repository<Tax>,
+    private readonly redisService: RedisService,
   ) {}
 
   async createTicket(dto: CreateTicketDto, eventId: string): Promise<Ticket> {
@@ -29,6 +35,12 @@ export class TicketService {
     }
 
     const savedTicket = await this.ticketRepo.save(ticket);
+
+    const client = this.redisService.getClient();
+    await client.set(
+      `remainingTickets:${savedTicket.id}`,
+      savedTicket.quantity,
+    );
 
     if (dto.addons && dto.addons.length > 0) {
       const addons = dto.addons.map((addon) =>
@@ -98,6 +110,12 @@ export class TicketService {
       });
     }
 
+    const client = this.redisService.getClient();
+    await client.set(
+      `remainingTickets:${updatedTicket.id}`,
+      updatedTicket.quantity,
+    );
+
     return updatedTicket;
   }
 
@@ -130,5 +148,21 @@ export class TicketService {
     }
 
     await this.ticketRepo.remove(ticket);
+  }
+
+  async reserveTickets(ticketId: string, quantity: number, orderId: string) {
+    const client = this.redisService.getClient();
+
+    const remainingKey = `remainingTickets:${ticketId}`;
+    const reservationKey = `reservation:${orderId}:${ticketId}`;
+
+    const remaining = await client.decrby(remainingKey, quantity);
+
+    if (remaining < 0) {
+      await client.incrby(remainingKey, quantity);
+      throw new BadRequestException(`Not enough tickets available`);
+    }
+
+    await client.set(reservationKey, quantity, 'EX', 900);
   }
 }

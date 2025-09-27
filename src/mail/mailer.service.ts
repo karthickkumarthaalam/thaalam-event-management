@@ -130,4 +130,81 @@ export class MailerService {
       attachments,
     });
   }
+
+  async sendPaymentLinkEmail(
+    eventName: string,
+    toEmail: string,
+    toName: string,
+    orderId: string,
+    checkoutUrl: string,
+  ): Promise<nodemailer.SentMessageInfo> {
+    const htmlContent = `
+  <div style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #333; background-color: #f5f5f7; padding: 40px 0;">
+    <div style="max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); overflow: hidden;">
+
+      <!-- Header -->
+      <div style="background-color: #4f46e5; padding: 20px; text-align: center; color: #ffffff;">
+        <h1 style="margin:0; font-size: 24px;">${eventName}</h1>
+      </div>
+
+      <!-- Body -->
+      <div style="padding: 30px;">
+        <h2 style="color: #111827; font-size: 20px; margin-bottom: 10px;">Hello ${toName},</h2>
+
+        <p style="font-size: 16px; line-height: 1.5;">
+          Your order <strong>#${orderId}</strong> has been created successfully.
+          To complete your booking, please proceed with the secure payment link below:
+        </p>
+
+        <div style="margin: 30px 0; text-align: center;">
+          <a href="${checkoutUrl}" 
+             style="background: linear-gradient(90deg, #6366f1, #4f46e5); color: #fff; padding: 16px 32px; 
+                    font-size: 16px; font-weight: bold; text-decoration: none; border-radius: 8px;
+                    display: inline-block; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: all 0.2s ease;">
+            Pay Now
+          </a>
+        </div>
+
+        <p style="font-size: 14px; color: #6b7280; text-align: center;">
+          Or copy and paste the link below into your browser:
+        </p>
+        <p style="word-break: break-all; text-align: center;">
+          <a href="${checkoutUrl}" style="color: #4f46e5; font-size: 14px;">${checkoutUrl}</a>
+        </p>
+
+        <p style="font-size: 14px; color: #6b7280; margin-top: 20px;">
+          This payment link will remain valid until the session expires. Please complete your payment at the earliest to confirm your order.
+        </p>
+
+        <div style="text-align: center; margin-top: 40px;">
+          <p style="margin:0; font-size: 16px; color: #111827;">Regards,</p>
+          <p style="margin:0; font-weight: bold; font-size: 16px; color: #111827;">Thaalam Media Team</p>
+          <img src="cid:logoimage" alt="Thaalam Media Logo" 
+               style="width: 120px; margin-top: 20px;" />
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div style="background-color: #f3f4f6; text-align: center; padding: 15px; font-size: 12px; color: #9ca3af;">
+        &copy; ${new Date().getFullYear()} Thaalam Media. All rights reserved.
+      </div>
+
+    </div>
+  </div>
+  `;
+
+    // const attachments: Attachment[] = [
+    //   {
+    //     filename: 'thaalam-logo.png',
+    //     path: path.join(process.cwd(), 'public/assets/thaalam-logo.png'),
+    //     cid: 'logoimage',
+    //   },
+    // ];
+
+    return this.sendEmail({
+      toEmail,
+      subject: `Complete Your Payment - Order #${orderId}`,
+      htmlContent,
+    });
+  }
 }

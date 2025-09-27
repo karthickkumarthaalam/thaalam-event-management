@@ -41,6 +41,17 @@ export class EventController {
     return this.eventService.create({ ...dto, logo: logoPath }, req.user);
   }
 
+  @Get('/booking')
+  findAllPublic(@Query() filter: FilterEventsDto) {
+    return this.eventService.findAll(filter);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('list')
+  getEventList() {
+    return this.eventService.eventList();
+  }
+
   @UseGuards(AuthGuard('jwt'))
   @Get()
   findAll(@Query() filter: FilterEventsDto, @Req() req: Request) {

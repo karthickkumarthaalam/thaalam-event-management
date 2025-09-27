@@ -40,6 +40,12 @@ export class EventService {
     return this.eventRepo.save(event);
   }
 
+  async eventList(): Promise<{ id: string; name: string }[]> {
+    return this.eventRepo.find({
+      select: ['id', 'name'],
+    });
+  }
+
   async findAll(filter: FilterEventsDto, user?: User) {
     const { page = 1, limit = 10, search, status } = filter;
 

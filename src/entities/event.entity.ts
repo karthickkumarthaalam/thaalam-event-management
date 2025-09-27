@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { Ticket } from './ticket.entity';
+import { PromoCode } from './promoCode.entity';
 
 export enum EventStatus {
   PLANING = 'planing',
@@ -62,6 +63,9 @@ export class Event {
 
   @OneToMany(() => Ticket, (ticket) => ticket.event, { cascade: true })
   tickets: Ticket[];
+
+  @OneToMany(() => PromoCode, (promo) => promo.event)
+  promoCodes: PromoCode[];
 
   @ManyToOne(() => User, (user) => user.events, { eager: true })
   created_by: User;

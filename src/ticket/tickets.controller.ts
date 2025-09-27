@@ -73,4 +73,9 @@ export class TicketController {
     }
     return this.ticketService.findTicketById(id);
   }
+
+  @Get('/events/:eventId/booking')
+  findTicketsForBooking(@Param('eventId') eventId: string) {
+    return this.ticketService.findTicketByEvent(eventId);
+  }
 }

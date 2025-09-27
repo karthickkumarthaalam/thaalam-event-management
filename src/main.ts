@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import * as express from 'express';
+import * as bodyParser from 'body-parser';
 import { join } from 'path';
 
 async function bootstrap() {
@@ -25,6 +26,8 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  app.use('/payments/webhook', bodyParser.raw({ type: 'application/json' }));
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
